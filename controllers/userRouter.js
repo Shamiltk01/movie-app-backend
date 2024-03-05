@@ -1,6 +1,7 @@
 const express=require("express")
 const bcrypt=require("bcrypt")
 const userModel=require("../models/userModel")
+const adminModel = require("../models/adminModel")
 const router=express.Router()
 
 const hashFunction=async(pass)=>{
@@ -53,9 +54,23 @@ router.post("/signin",async(req,res)=>{
         let inputEmail=req.body.logemail
         let data=await userModel.findOne({logemail:inputEmail})
         if(!data){
-            return(res.json({
-                status:"no user found"
-            }))
+            let admindata=await adminModel.findOne({logemail:inputEmail})
+            if(!admindata){
+                return(res.json({
+                    status:"no user found"
+                }))
+            }
+            let dbPasswordAdmin=admindata.logpass
+            if(inputPass !== dbPasswordAdmin){
+                return(res.json({
+                    status:"incorrect password"
+                }))
+            }else{
+                return(res.json({
+                    status:"success",
+                    adminData:admindata
+                }))
+            }
         }
         let dbPassword=data.logpass
         let match=await bcrypt.compare(inputPass,dbPassword)
@@ -76,6 +91,7 @@ router.post("/signin",async(req,res)=>{
             message:"somthing went wrong in user signin."
         })
     }
+    
 })
 
 module.exports=router
