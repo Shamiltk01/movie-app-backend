@@ -6,7 +6,6 @@ const tempUserModel = require("../models/tempUserModel");
 
 const router = express.Router();
 
-
 //hashfunction
 const hashFunction = async (pass) => {
   let salt = await bcrypt.genSalt(10);
@@ -20,22 +19,19 @@ router.post("/signup", async (req, res) => {
     let inputEmail = req.body.logemail;
     let input = req.body;
     let data = await userModel.findOne({ logemail: inputEmail });
-
     if (!data) {
       let tempUser = await tempUserModel.findOne({ logemail: inputEmail });
-
       if (!tempUser) {
         let hashedPass = await hashFunction(inputPass);
         input.logpass = hashedPass;
         let newUser = new tempUserModel(input);
         await newUser.save();
-
         return res.json({
-          status: "waiting for approval",
+          status: "successfully send request",
         });
       } else {
         return res.json({
-          status: tempUser.status,
+          status: "request is pending",
         });
       }
     } else {
@@ -57,6 +53,12 @@ router.post("/signin", async (req, res) => {
   try {
     let inputPass = req.body.logpass;
     let inputEmail = req.body.logemail;
+    let tempData = await tempUserModel.findOne({ logemail: inputEmail });
+    if (tempData) {
+      res.json({
+        status: "request is pending",
+      });
+    }
     let data = await userModel.findOne({ logemail: inputEmail });
     if (!data) {
       let admindata = await adminModel.findOne({ logemail: inputEmail });

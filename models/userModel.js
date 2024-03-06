@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const userModel = new mongoose.Schema({
+  
   logname: {
     type: String,
     required: true,
