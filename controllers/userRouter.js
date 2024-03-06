@@ -2,6 +2,8 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const userModel = require("../models/userModel");
 const adminModel = require("../models/adminModel");
+const tempUserModel = require("../models/tempUserModel");
+
 const router = express.Router();
 
 const hashFunction = async (pass) => {
@@ -11,30 +13,36 @@ const hashFunction = async (pass) => {
 
 router.post("/signup", async (req, res) => {
   try {
-    let inputPassword = req.body.logpass;
-    let user = req.body.logemail;
-    let username = req.body.logname;
+    let inputPass = req.body.logpass;
+    let inputEmail = req.body.logemail;
     let input = req.body;
-    let data = await userModel.findOne({ logemail: user });
+    let data = await userModel.findOne({ logemail: inputEmail });
 
-    if (data) {
+    if (!data) {
+      let tempUser = await tempUserModel.findOne({ logemail: inputEmail });
+
+      if (!tempUser) {
+        let hashedPass = await hashFunction(inputPass);
+        input.logpass = hashedPass;
+        let newUser = new tempUserModel(input);
+        await newUser.save();
+
+        return res.json({
+          status: "waiting for approval",
+        });
+      } else {
+        return res.json({
+          status: tempUser.status,
+        });
+      }
+    } else {
       return res.json({
         status: "user already exists",
       });
     }
-    let hashedPass = await hashFunction(inputPassword);
-
-    input.logpass = hashedPass;
-    let newUser = new userModel(input);
-
-    await newUser.save();
-
-    res.json({
-      status: "success",
-    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
+    return res.status(500).json({
       status: "error",
       message: "something went wrong in user signup.",
     });
