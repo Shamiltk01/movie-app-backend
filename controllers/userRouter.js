@@ -41,7 +41,6 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-
 //admin with user signin
 router.post("/signin", async (req, res) => {
   try {
@@ -62,7 +61,7 @@ router.post("/signin", async (req, res) => {
         });
       } else {
         return res.json({
-          status: "admin success"
+          status: "admin success",
         });
       }
     }

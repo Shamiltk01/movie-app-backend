@@ -1,5 +1,6 @@
 const express=require("express")
 const adminModel=require("../models/adminModel")
+const userModel = require("../models/userModel")
 
 const router=express.Router()
 
@@ -32,5 +33,23 @@ const router=express.Router()
 //     })
 //   }
 // })
+
+//reject user request
+router.put("/reject/:id",async(req,res)=>{
+  try {
+    let id=req.params.id
+    await userModel.findByIdAndDelete(id)
+    res.json({
+      status:"deleted successfully"
+    })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({
+      status:"error",
+      message:"somthing went wrong in accept  user request."
+    })
+  }
+})
+
 
 module.exports=router
