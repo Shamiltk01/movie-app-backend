@@ -41,6 +41,8 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+
+//admin with user signin
 router.post("/signin", async (req, res) => {
   try {
     let inputPass = req.body.logpass;
@@ -60,8 +62,7 @@ router.post("/signin", async (req, res) => {
         });
       } else {
         return res.json({
-          status: "success",
-          adminData: admindata,
+          status: "success"
         });
       }
     }
