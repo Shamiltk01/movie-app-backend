@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const userModel = new mongoose.Schema({
+const tempUserModel = new mongoose.Schema({
   logname: {
     type: String,
     required: true,
@@ -13,6 +13,12 @@ const userModel = new mongoose.Schema({
     type: String,
     required: true,
   },
+  status: {
+    type: Boolean,
+    required: true,
+    status: Boolean,default: false
+    
+  },
 });
 
-module.exports = mongoose.model("users", userModel);
+module.exports=mongoose.model("tempusers",tempUserModel)

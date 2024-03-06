@@ -1,81 +1,99 @@
-const express=require("express")
-const bcrypt=require("bcrypt")
-const userModel=require("../models/userModel")
-const router=express.Router()
+const express = require("express");
+const bcrypt = require("bcrypt");
+const userModel = require("../models/userModel");
+const adminModel = require("../models/adminModel");
+const tempUserModel = require("../models/tempUserModel");
 
-const hashFunction=async(pass)=>{
-    let salt=await bcrypt.genSalt(10)
-    return bcrypt.hash(pass,salt)
-}
+const router = express.Router();
 
+
+//hashfunction
+const hashFunction = async (pass) => {
+  let salt = await bcrypt.genSalt(10);
+  return bcrypt.hash(pass, salt);
+};
+
+//user signup
 router.post("/signup", async (req, res) => {
-    try {
-        
-        let inputPassword = req.body.logpass;
-        let user = req.body.logemail;
-        let username=req.body.logname
-        let input=req.body
-        
-        
-        // Find if the user already exists
-        let data = await userModel.findOne({ logemail: user });
-        
-        if (data) {
-            return res.json({
-                status: "user already exists"
-            });
-        }
-        
-        // User doesn't exist, proceed with hashing password and saving user
-        let hashedPass = await hashFunction(inputPassword);
-        
-        // Create a new user object with the provided data
-        input.logpass=hashedPass
-        let newUser=new userModel(input)
-        
+  try {
+    let inputPass = req.body.logpass;
+    let inputEmail = req.body.logemail;
+    let input = req.body;
+    let data = await userModel.findOne({ logemail: inputEmail });
+
+    if (!data) {
+      let tempUser = await tempUserModel.findOne({ logemail: inputEmail });
+
+      if (!tempUser) {
+        let hashedPass = await hashFunction(inputPass);
+        input.logpass = hashedPass;
+        let newUser = new tempUserModel(input);
         await newUser.save();
-        
-        res.json({
-            status: "success"
+
+        return res.json({
+          status: "waiting for approval",
         });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            status: "error",
-            message: "something went wrong in user signup."
+      } else {
+        return res.json({
+          status: tempUser.status,
         });
+      }
+    } else {
+      return res.json({
+        status: "user already exists",
+      });
     }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "error",
+      message: "something went wrong in user signup.",
+    });
+  }
 });
 
-router.post("/signin",async(req,res)=>{
-    try {
-        let inputPass=req.body.logpass
-        let inputEmail=req.body.logemail
-        let data=await userModel.findOne({logemail:inputEmail})
-        if(!data){
-            return(res.json({
-                status:"no user found"
-            }))
-        }
-        let dbPassword=data.logpass
-        let match=await bcrypt.compare(inputPass,dbPassword)
-        if(!match){
-            return(res.json({
-                status:"password not match"
-            }))
-        }
-        res.json({
-            status:"success",
-            userData:data
-        })
-        
-    } catch (error) {
-        console.error(error)
-        res.json({
-            status:"error",
-            message:"somthing went wrong in user signin."
-        })
+//admin with user signin
+router.post("/signin", async (req, res) => {
+  try {
+    let inputPass = req.body.logpass;
+    let inputEmail = req.body.logemail;
+    let data = await userModel.findOne({ logemail: inputEmail });
+    if (!data) {
+      let admindata = await adminModel.findOne({ logemail: inputEmail });
+      if (!admindata) {
+        return res.json({
+          status: "no user found",
+        });
+      }
+      let dbPasswordAdmin = admindata.logpass;
+      if (inputPass !== dbPasswordAdmin) {
+        return res.json({
+          status: "incorrect password",
+        });
+      } else {
+        return res.json({
+          status: "admin success",
+        });
+      }
     }
-})
+    let dbPassword = data.logpass;
+    let match = await bcrypt.compare(inputPass, dbPassword);
+    if (!match) {
+      return res.json({
+        status: "incorrect password",
+      });
+    }
+    res.json({
+      status: "user success",
+      userData: data,
+    });
+  } catch (error) {
+    console.error(error);
+    res.json({
+      status: "error",
+      message: "somthing went wrong in signin.",
+    });
+  }
+});
 
-module.exports=router
+module.exports = router;
