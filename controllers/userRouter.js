@@ -62,7 +62,7 @@ router.post("/signin", async (req, res) => {
         });
       } else {
         return res.json({
-          status: "success"
+          status: "admin success"
         });
       }
     }
@@ -74,7 +74,7 @@ router.post("/signin", async (req, res) => {
       });
     }
     res.json({
-      status: "success",
+      status: "user success",
       userData: data,
     });
   } catch (error) {
