@@ -6,11 +6,14 @@ const tempUserModel = require("../models/tempUserModel");
 
 const router = express.Router();
 
+
+//hashfunction
 const hashFunction = async (pass) => {
   let salt = await bcrypt.genSalt(10);
   return bcrypt.hash(pass, salt);
 };
 
+//user signup
 router.post("/signup", async (req, res) => {
   try {
     let inputPass = req.body.logpass;
