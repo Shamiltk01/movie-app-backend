@@ -19,9 +19,8 @@ router.post("/signup", async (req, res) => {
     let inputEmail = req.body.logemail;
     let inputName = req.body.logname;
     if (!inputPass || !inputEmail || !inputName) {
-      return res.status(400).json({
-        status: "error",
-        message: "Fill all the fields in signup.",
+      return res.json({
+        status: "required all fields.",
       });
     }
     let input = req.body;
@@ -60,11 +59,10 @@ router.post("/signin", async (req, res) => {
   try {
     const inputPass = req.body.logpass;
     const inputEmail = req.body.logemail;
-    if(!inputPass || !inputEmail){
-      res.status(400).json({
-        status:"error",
-        message:"fill all the fields in signin."
-      })
+    if (!inputPass || !inputEmail) {
+      res.json({
+        status: "required all fields",
+      });
     }
 
     let tempData = await tempUserModel.findOne({ logemail: inputEmail });
