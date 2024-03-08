@@ -17,6 +17,13 @@ router.post("/signup", async (req, res) => {
   try {
     let inputPass = req.body.logpass;
     let inputEmail = req.body.logemail;
+    let inputName = req.body.logname;
+    if (!inputPass || !inputEmail || !inputName) {
+      return res.status(400).json({
+        status: "error",
+        message: "Fill all the fields in signup.",
+      });
+    }
     let input = req.body;
     let data = await userModel.findOne({ logemail: inputEmail });
     if (!data) {
@@ -51,14 +58,22 @@ router.post("/signup", async (req, res) => {
 //admin with user signin
 router.post("/signin", async (req, res) => {
   try {
-    let inputPass = req.body.logpass;
-    let inputEmail = req.body.logemail;
+    const inputPass = req.body.logpass;
+    const inputEmail = req.body.logemail;
+    if(!inputPass || !inputEmail){
+      res.status(400).json({
+        status:"error",
+        message:"fill all the fields in signin."
+      })
+    }
+
     let tempData = await tempUserModel.findOne({ logemail: inputEmail });
     if (tempData) {
-      res.json({
+      return res.json({
         status: "request is pending",
       });
     }
+
     let data = await userModel.findOne({ logemail: inputEmail });
     if (!data) {
       let admindata = await adminModel.findOne({ logemail: inputEmail });
@@ -67,7 +82,7 @@ router.post("/signin", async (req, res) => {
           status: "no user found",
         });
       }
-      let dbPasswordAdmin = admindata.logpass;
+      const dbPasswordAdmin = admindata.logpass;
       if (inputPass !== dbPasswordAdmin) {
         return res.json({
           status: "incorrect password",
@@ -78,22 +93,24 @@ router.post("/signin", async (req, res) => {
         });
       }
     }
-    let dbPassword = data.logpass;
-    let match = await bcrypt.compare(inputPass, dbPassword);
+
+    const dbPassword = data.logpass;
+    const match = await bcrypt.compare(inputPass, dbPassword);
     if (!match) {
       return res.json({
         status: "incorrect password",
       });
     }
-    res.json({
+
+    return res.json({
       status: "user success",
       userData: data,
     });
   } catch (error) {
     console.error(error);
-    res.json({
+    return res.json({
       status: "error",
-      message: "somthing went wrong in signin.",
+      message: "something went wrong in signin.",
     });
   }
 });
