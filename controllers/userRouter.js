@@ -86,8 +86,13 @@ router.post("/signin", async (req, res) => {
           status: "incorrect password",
         });
       } else {
+        const adminSendData = {
+          _id: admindata._id,
+          logname: admindata.logname,
+        };
         return res.json({
           status: "admin success",
+          adminData: adminSendData,
         });
       }
     }
