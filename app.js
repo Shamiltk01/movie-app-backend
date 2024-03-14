@@ -3,6 +3,9 @@ const mongoose = require("mongoose")
 const cors = require("cors")
 const userRouter=require("./controllers/userRouter")
 const adminRouter=require("./controllers/adminRouter")
+const showRouter=require("./controllers/showRouter")
+const movieRouter=require("./controllers/movieRouter")
+const seatRouter=require("./controllers/seatRouter")
 
 const app = express()
 
@@ -13,6 +16,9 @@ mongoose.connect("mongodb+srv://shamiltk02:shamiltk98@cluster0.7syqm.mongodb.net
 
 app.use("/user",userRouter)
 app.use("/admin",adminRouter)
+app.use("/show",showRouter)
+app.use("/movie",movieRouter)
+app.use("/seat",seatRouter)
 
 
 
